@@ -1,45 +1,72 @@
-PRODUCT_VERSION_MAJOR = 22
-PRODUCT_VERSION_MINOR = 2
+# Copyright (C) 2018-23 The SuperiorOS Project
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
-ifeq ($(LINEAGE_VERSION_APPEND_TIME_OF_DAY),true)
-    LINEAGE_BUILD_DATE := $(shell date -u +%Y%m%d_%H%M%S)
+#Superior OS Versioning :
+SUPERIOR_MOD_VERSION = Sixteen
+
+ifndef SUPERIOR_BUILD_TYPE
+    SUPERIOR_BUILD_TYPE := Unofficial
+endif
+
+# Test Build Tag
+ifeq ($(SUPERIOR_TEST),true)
+    SUPERIOR_BUILD_TYPE := Developer
+endif
+
+SUPERIOR_DEVICE=$(shell echo "$(TARGET_PRODUCT)" | cut -d'_' -f 2,3)
+SUPERIOR_BUILD_DATE_UTC := $(shell date -u '+%Y%m%d-%H%M')
+BUILD_DATE_TIME := $(shell date -u '+%Y%m%d%H%M')
+
+ifeq ($(SUPERIOR_OFFICIAL), true)
+   LIST = $(shell cat vendor/superior/superior.devices)
+    ifeq ($(filter $(SUPERIOR_DEVICE), $(LIST)), $(SUPERIOR_DEVICE))
+      IS_OFFICIAL=true
+      SUPERIOR_BUILD_TYPE := Official
+
+PRODUCT_PACKAGES += \
+    Updater
+
+    endif
+    ifneq ($(IS_OFFICIAL), true)
+       SUPERIOR_BUILD_TYPE := Unofficial
+       $(error Device is not official "$(SUPERIOR_DEVICE)")
+    endif
+endif
+
+ifeq ($(BUILD_WITH_GAPPS),true)
+SUPERIOR_EDITION := Gapps
 else
-    LINEAGE_BUILD_DATE := $(shell date -u +%Y%m%d)
+SUPERIOR_EDITION := Vanilla
 endif
 
-# Set LINEAGE_BUILDTYPE from the env RELEASE_TYPE, for jenkins compat
-
-ifndef LINEAGE_BUILDTYPE
-    ifdef RELEASE_TYPE
-        # Starting with "LINEAGE_" is optional
-        RELEASE_TYPE := $(shell echo $(RELEASE_TYPE) | sed -e 's|^LINEAGE_||g')
-        LINEAGE_BUILDTYPE := $(RELEASE_TYPE)
-    endif
+ifeq ($(SUPERIOR_EDITION), Gapps)
+SUPERIOR_VERSION := SuperiorOS-$(SUPERIOR_MOD_VERSION)-$(SUPERIOR_DEVICE)-$(SUPERIOR_EDITION)-$(SUPERIOR_BUILD_TYPE)-$(SUPERIOR_BUILD_DATE_UTC)
+SUPERIOR_FINGERPRINT := SuperiorOS/$(SUPERIOR_MOD_VERSION)/$(PLATFORM_VERSION)/$(SUPERIOR_BUILD_DATE_UTC)
+SUPERIOR_DISPLAY_VERSION := SuperiorOS-$(SUPERIOR_MOD_VERSION)-$(SUPERIOR_BUILD_TYPE)
+else
+SUPERIOR_VERSION := SuperiorOS-$(SUPERIOR_MOD_VERSION)-$(SUPERIOR_DEVICE)-$(SUPERIOR_EDITION)-$(SUPERIOR_BUILD_TYPE)-$(SUPERIOR_BUILD_DATE_UTC)
+SUPERIOR_FINGERPRINT := SuperiorOS/$(SUPERIOR_MOD_VERSION)/$(PLATFORM_VERSION)/$(SUPERIOR_BUILD_DATE_UTC)
+SUPERIOR_DISPLAY_VERSION := SuperiorOS-$(SUPERIOR_MOD_VERSION)-$(SUPERIOR_BUILD_TYPE)
 endif
 
-# Filter out random types, so it'll reset to UNOFFICIAL
-ifeq ($(filter RELEASE NIGHTLY SNAPSHOT EXPERIMENTAL,$(LINEAGE_BUILDTYPE)),)
-    LINEAGE_BUILDTYPE := UNOFFICIAL
-    LINEAGE_EXTRAVERSION :=
-endif
+TARGET_PRODUCT_SHORT := $(subst superior_,,$(SUPERIOR_BUILD))
 
-ifeq ($(LINEAGE_BUILDTYPE), UNOFFICIAL)
-    ifneq ($(TARGET_UNOFFICIAL_BUILD_ID),)
-        LINEAGE_EXTRAVERSION := -$(TARGET_UNOFFICIAL_BUILD_ID)
-    endif
-endif
-
-LINEAGE_VERSION_SUFFIX := $(LINEAGE_BUILD_DATE)-$(LINEAGE_BUILDTYPE)$(LINEAGE_EXTRAVERSION)-$(LINEAGE_BUILD)
-
-# Internal version
-LINEAGE_VERSION := $(PRODUCT_VERSION_MAJOR).$(PRODUCT_VERSION_MINOR)-$(LINEAGE_VERSION_SUFFIX)
-
-# Display version
-LINEAGE_DISPLAY_VERSION := $(PRODUCT_VERSION_MAJOR)-$(LINEAGE_VERSION_SUFFIX)
-
-# LineageOS version properties
-PRODUCT_SYSTEM_PROPERTIES += \
-    ro.lineage.version=$(LINEAGE_VERSION) \
-    ro.lineage.display.version=$(LINEAGE_DISPLAY_VERSION) \
-    ro.lineage.build.version=$(PRODUCT_VERSION_MAJOR).$(PRODUCT_VERSION_MINOR) \
-    ro.lineage.releasetype=$(LINEAGE_BUILDTYPE)
+PRODUCT_SYSTEM_DEFAULT_PROPERTIES += \
+  ro.superior.version=$(SUPERIOR_VERSION) \
+  ro.superior.releasetype=$(SUPERIOR_BUILD_TYPE) \
+  ro.modversion=$(SUPERIOR_MOD_VERSION) \
+  ro.superior.display.version=$(SUPERIOR_DISPLAY_VERSION) \
+  ro.superior.fingerprint=$(SUPERIOR_FINGERPRINT) \
+  ro.build.datetime=$(BUILD_DATE_TIME) \
+  ro.superior.edition=$(SUPERIOR_EDITION)
