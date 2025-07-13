@@ -46,6 +46,7 @@ endif
 
 ifeq ($(BUILD_WITH_GAPPS),true)
 SUPERIOR_EDITION := Gapps
+include vendor/gapps/arm64/arm64-vendor.mk
 else
 SUPERIOR_EDITION := Vanilla
 endif

@@ -13,6 +13,7 @@ endif
 
 # Launcher3
 PRODUCT_PACKAGES += \
+    ThemePicker \
     Launcher3Overlay
 
 # Media
