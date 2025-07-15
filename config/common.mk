@@ -249,8 +249,7 @@ PRODUCT_PRODUCT_PROPERTIES += \
 
 PRODUCT_ENFORCE_RRO_EXCLUDED_OVERLAYS += vendor/superior/overlay/no-rro
 PRODUCT_PACKAGE_OVERLAYS += \
-    vendor/superior/overlay/common \
-    vendor/superior/overlay/no-rro
+    vendor/superior/overlay/common
 
 PRODUCT_PACKAGES += \
     DocumentsUIOverlay \
