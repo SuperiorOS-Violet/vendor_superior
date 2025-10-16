@@ -93,6 +93,9 @@ ifneq ($(TARGET_DISABLE_EPPE),true)
 $(call enforce-product-packages-exist-internal,$(wildcard device/*/$(SUPERIOR_BUILD)/$(TARGET_PRODUCT).mk),product_manifest.xml rild Calendar android.hidl.memory@1.0-impl.vendor vndk_apex_snapshot_package)
 endif
 
+# Bootanimation
+include vendor/superior/bootanimation/bootanimation.mk
+
 # Superior packages
 PRODUCT_COPY_FILES += \
     vendor/superior/prebuilt/common/etc/init/init.superior-updater.rc:$(TARGET_COPY_OUT_SYSTEM_EXT)/etc/init/init.superior-updater.rc
