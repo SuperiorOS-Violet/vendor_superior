@@ -144,45 +144,41 @@ func (g *Module) GenerateAndroidBuildActions(ctx android.ModuleContext) {
 	tools := map[string]android.Path{}
 
 	if len(g.properties.Tools) > 0 {
-		seenTools := make(map[string]bool)
 		ctx.VisitDirectDepsProxyAllowDisabled(func(proxy android.ModuleProxy) {
 			module := android.PrebuiltGetPreferred(ctx, proxy)
-			switch tag := ctx.OtherModuleDependencyTag(proxy).(type) {
-			case hostToolDependencyTag:
+			switch ctx.OtherModuleDependencyTag(module) {
+			case hostToolDepTag:
 				tool := ctx.OtherModuleName(module)
+				var path android.OptionalPath
 
-				if h, ok := android.OtherModuleProvider(ctx, module, android.HostToolProviderInfoProvider); ok {
-					if !android.OtherModulePointerProviderOrDefault(ctx, module, android.CommonModuleInfoProvider).Enabled {
+				if t, ok := module.(HostToolProvider); ok {
+					if !t.(android.Module).Enabled(ctx) {
 						if ctx.Config().AllowMissingDependencies() {
 							ctx.AddMissingDependencies([]string{tool})
 						} else {
 							ctx.ModuleErrorf("depends on disabled module %q", tool)
 						}
-						return
+						break
 					}
-				path := h.HostToolPath
-					if !path.Valid() {
-						ctx.ModuleErrorf("host tool %q missing output file", tool)
-						return
-					}
-
-					if _, exists := seenTools[tool]; exists {
-						ctx.ModuleErrorf("multiple host tools found for %q", tool)
-						return
-					}
-					seenTools[tool] = true
-
-					g.implicitDeps = append(g.implicitDeps, path.Path())
-					tools[tool] = path.Path()
-
+					path = t.HostToolPath()
 				} else {
 					ctx.ModuleErrorf("%q is not a host tool provider", tool)
-					return
+					break
 				}
 
+				if path.Valid() {
+					g.implicitDeps = append(g.implicitDeps, path.Path())
+					if _, exists := tools[tool]; !exists {
+						tools[tool] = path.Path()
+					} else {
+						ctx.ModuleErrorf("multiple tools for %q, %q and %q", tool, tools[tool], path.Path().String())
+					}
+				} else {
+					ctx.ModuleErrorf("host tool %q missing output file", tool)
+				}
 			default:
-				if !android.IsSourceDepTagWithOutputTag(tag, "") {
-					ctx.ModuleErrorf("unknown dependency on %q", ctx.OtherModuleName(proxy))
+				if !android.IsSourceDepTagWithOutputTag(ctx.OtherModuleDependencyTag(module), "") {
+					ctx.ModuleErrorf("unknown dependency on %q", ctx.OtherModuleName(module))
 				}
 			}
 		})
