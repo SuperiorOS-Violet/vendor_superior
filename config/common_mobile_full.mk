@@ -9,5 +9,7 @@ $(call inherit-product-if-exists, external/google-fonts/rubik/fonts.mk)
 
 # Extra cmdline tools
 PRODUCT_PACKAGES += \
-    unrar \
+    unrar
+
+PRODUCT_HOST_PACKAGES += \
     zstd
