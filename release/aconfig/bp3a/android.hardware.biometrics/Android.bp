@@ -12,9 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-build_flag_declarations {
-    name: "build_flags-build-release-mica",
+aconfig_values {
+    name: "aconfig-values-bp3a-android.hardware.biometrics-all",
+    package: "android.hardware.biometrics",
     srcs: [
-        "RELEASE_*.textproto",
+        "*_flag_values.textproto",
     ],
 }
