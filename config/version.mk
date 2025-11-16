@@ -13,7 +13,7 @@
 # limitations under the License.
 
 #Superior OS Versioning :
-SUPERIOR_MOD_VERSION = Sixteen
+SUPERIOR_MOD_VERSION = 16
 
 ifndef SUPERIOR_BUILD_TYPE
     SUPERIOR_BUILD_TYPE := Unofficial
@@ -32,26 +32,26 @@ ifeq ($(SUPERIOR_OFFICIAL), true)
    LIST = $(shell cat vendor/superior/superior.devices)
     ifeq ($(filter $(SUPERIOR_DEVICE), $(LIST)), $(SUPERIOR_DEVICE))
       IS_OFFICIAL=true
-      SUPERIOR_BUILD_TYPE := Official
+      SUPERIOR_BUILD_TYPE := OFFICIAL
 
 PRODUCT_PACKAGES += \
     Updater
 
     endif
     ifneq ($(IS_OFFICIAL), true)
-       SUPERIOR_BUILD_TYPE := Unofficial
+       SUPERIOR_BUILD_TYPE := UNOFFICIAL
        $(error Device is not official "$(SUPERIOR_DEVICE)")
     endif
 endif
 
 ifeq ($(BUILD_WITH_GAPPS),true)
-SUPERIOR_EDITION := Gapps
-include vendor/gapps/arm64/arm64-vendor.mk
+SUPERIOR_EDITION := GAPPS
+$(call inherit-product, vendor/gms/products/gms.mk)
 else
-SUPERIOR_EDITION := Vanilla
+SUPERIOR_EDITION := VANILLA
 endif
 
-ifeq ($(SUPERIOR_EDITION), Gapps)
+ifeq ($(SUPERIOR_EDITION), GAPPS)
 SUPERIOR_VERSION := SuperiorOS-$(SUPERIOR_MOD_VERSION)-$(SUPERIOR_DEVICE)-$(SUPERIOR_EDITION)-$(SUPERIOR_BUILD_TYPE)-$(SUPERIOR_BUILD_DATE_UTC)
 SUPERIOR_FINGERPRINT := SuperiorOS/$(SUPERIOR_MOD_VERSION)/$(PLATFORM_VERSION)/$(SUPERIOR_BUILD_DATE_UTC)
 SUPERIOR_DISPLAY_VERSION := SuperiorOS-$(SUPERIOR_MOD_VERSION)-$(SUPERIOR_BUILD_TYPE)
