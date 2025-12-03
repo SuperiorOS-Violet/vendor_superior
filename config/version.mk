@@ -46,7 +46,7 @@ endif
 
 ifeq ($(BUILD_WITH_GAPPS),true)
 SUPERIOR_EDITION := GAPPS
-$(call inherit-product, vendor/gms/products/gms.mk)
+#$(call inherit-product, vendor/gms/products/gms.mk)
 else
 SUPERIOR_EDITION := VANILLA
 endif
